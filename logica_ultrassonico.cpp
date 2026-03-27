@@ -1,18 +1,42 @@
-// Função que retorna a distância em centímetros
+// C++ code
+const int TRIG = 12;
+const int ECHO = 11;
+const int MAX_DIST 200;
+
+void setup() {
+  Serial.begin(9600);
+  pinMode(TRIG, OUTPUT);
+  pinMode(ECHO, INPUT);
+}
+
+void loop() {
+ int distancia = lerDistancia();
+
+  // exemplo de como pode ser usado no robÔ:
+  if (distancia > 0 && distancia < 25) {
+    // irFrente();
+  }
+  else {
+    // girarProcurando();
+  }
+}
+
 int lerDistancia() {
-  digitalWrite(trigPin, LOW);
-  delayMicroseconds(2);
-  
-  // Dispara o pulso por 10 microssegundos
-  digitalWrite(trigPin, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(trigPin, LOW);
-  
-  // Lê o tempo de retorno do eco
-  long duracao = pulseIn(echoPin, HIGH);
-  
-  // Calcula a distância (Velocidade do som é ~340 m/s ou 0.034 cm/us)
-  int distancia = duracao * 0.034 / 2;
-  
-  return distancia;
+  long duracao = 0;
+
+  // Faz uma média das 3 distancias lidas pra evitar erros
+  for (int i = 0; i < 3; i++) {
+    // Dispara o sensor para enviar um pulso
+    digitalWrite(TRIG, LOW);
+    delayMicroseconds(2);
+    digitalWrite(TRIG, HIGH);
+    delayMicroseconds(10);
+    digitalWrite(TRIG, LOW);
+
+    duracao += pulseIn(ECHO, HIGH, 10000);
+    delay(5);
+  }
+
+  // Retorna a média da distancia em centímetros
+  return (duracao / 3) / 58;
 }
