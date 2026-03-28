@@ -3,6 +3,8 @@ const int TRIG = 12;
 const int ECHO = 11;
 const int MAX_DIST 200;
 
+#define DEBUG 1  // 1 = ligado, 0 = desligado
+
 void setup() {
   Serial.begin(9600);
   pinMode(TRIG, OUTPUT);
@@ -10,7 +12,10 @@ void setup() {
 }
 
 void loop() {
- int distancia = lerDistancia();
+  int distancia = lerDistancia();
+  #if DEBUG
+    Serial.println(distancia);
+  #endif
 
   // exemplo de como pode ser usado no robÔ:
   if (distancia > 0 && distancia < 25) {
