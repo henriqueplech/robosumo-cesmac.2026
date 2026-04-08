@@ -1,60 +1,142 @@
-// Motor Esquerdo
-int motorEsqPin1 = 7, motorEsqPin2 = 8;
-int ativadorEsquerdo = 3;
+// ==========================
+// DEFINIÇÃO DOS PINOS
+// ==========================
+
+// Motor esquerdo
+int motorEsqPin1 = 7;
+int motorEsqPin2 = 8;
+int ativadorEsquerdo = 3; // PWM
 
 // Motor direito
-int motorDirPin1 = 12, motorDirPin2 = 13;
-int ativadorDireito = 5;
+int motorDirPin1 = 12;
+int motorDirPin2 = 13;
+int ativadorDireito = 5; // PWM
 
-int VEL_ATAQUE = 255;
-int VEL_BUSCA = 150;
-int VEL_FUGA = 200;
+
+// ==========================
+// CONFIGURAÇÕES DE VELOCIDADE
+// ==========================
+
+int VEL_ATAQUE = 255; // máxima potência
+int VEL_BUSCA  = 150; // velocidade média
+int VEL_FUGA   = 200; // velocidade para recuar
+
+// Ajuste fino (caso o robô puxe pra um lado)
+int ajusteEsq = 255;
+int ajusteDir = 255;
+
+
+// ==========================
+// ENUM PARA DIREÇÃO
+// ==========================
+
+enum Direcao {
+  FRENTE,
+  TRAS
+};
+
+
+// ==========================
+// SETUP
+// ==========================
 
 void setup() {
- // Setar pinos de saída da ponte h
- pinMode(motorEsqPin1, OUTPUT);
- pinMode(motorEsqPin2, OUTPUT);
- pinMode(ativadorEsquerdo, OUTPUT);
-  
- pinMode(motorDirPin1, OUTPUT);
- pinMode(motorDirPin2, OUTPUT);
- pinMode(ativadorDireito, OUTPUT);
- 
- // Envia um valor analógico pro ativador de cada motor
- // Aqui definimos a potência do motor
- // (Pode ir de 0 à 255)
+  // Configura todos os pinos como saída
+  pinMode(motorEsqPin1, OUTPUT);
+  pinMode(motorEsqPin2, OUTPUT);
+  pinMode(ativadorEsquerdo, OUTPUT);
+
+  pinMode(motorDirPin1, OUTPUT);
+  pinMode(motorDirPin2, OUTPUT);
+  pinMode(ativadorDireito, OUTPUT);
+
+  // Inicialmente, deixa o robô parado
+  parar();
 }
-  
+
+
+// ==========================
+// LOOP PRINCIPAL
+// ==========================
+
 void loop() {
- 
+  // Aqui você vai colocar a lógica do robô (sensores)
+
+  // Exemplo básico:
+  // int distancia = lerDistancia();
+
+  // if (distancia > 0 && distancia < 20) {
+  //   irFrente(); // ataca
+  // } else {
+  //   girarProcurando(); // procura inimigo
+  // }
+
+  // Por enquanto, só gira (teste)
+  girarProcurando();
 }
 
-// Funções que definem os movimentos que o carrinho pode fazer
+
+// ==========================
+// FUNÇÃO AUXILIAR DE MOTOR
+// ==========================
+
+// Controla um motor individual
+void setMotor(int pin1, int pin2, Direcao dir) {
+  if (dir == FRENTE) {
+    digitalWrite(pin1, HIGH);
+    digitalWrite(pin2, LOW);
+  } else {
+    digitalWrite(pin1, LOW);
+    digitalWrite(pin2, HIGH);
+  }
+}
+
+
+// ==========================
+// FUNÇÃO PRINCIPAL DE MOVIMENTO
+// ==========================
+
+// Controla os dois motores ao mesmo tempo
+void mover(int velEsq, int velDir, Direcao direcaoEsq, Direcao direcaoDir) {
+  
+  // Define direção de cada motor
+  setMotor(motorEsqPin1, motorEsqPin2, direcaoEsq);
+  setMotor(motorDirPin1, motorDirPin2, direcaoDir);
+
+  // Define velocidade (PWM)
+  analogWrite(ativadorEsquerdo, velEsq);
+  analogWrite(ativadorDireito, velDir);
+}
+
+
+// ==========================
+// MOVIMENTOS DO ROBÔ
+// ==========================
+
+// Anda para frente (ataque)
 void irFrente() {
-  digitalWrite(motorEsqPin1, HIGH); digitalWrite(motorEsqPin2, LOW);
-  digitalWrite(motorDirPin1, HIGH); digitalWrite(motorDirPin2, LOW);
-  analogWrite(ativadorEsquerdo, 255);
-  analogWrite(ativadorDireito, 255);
+  mover(ajusteEsq, ajusteDir, FRENTE, FRENTE);
 }
 
+// Anda para trás (fuga)
 void irTras() {
-  digitalWrite(motorEsqPin1, LOW); digitalWrite(motorEsqPin2, HIGH);
-  digitalWrite(motorDirPin1, LOW); digitalWrite(motorDirPin2, HIGH);
-  analogWrite(ativadorEsquerdo, 170);
-  analogWrite(ativadorDireito, 170);
+  mover(VEL_FUGA, VEL_FUGA, TRAS, TRAS);
 }
 
+// Gira no próprio eixo procurando inimigo
 void girarProcurando() {
-  // Gira no próprio eixo (um motor pra frente, outro pra trás)
-  digitalWrite(motorEsqPin1, HIGH); digitalWrite(motorEsqPin2, LOW);
-  digitalWrite(motorDirPin1, LOW);  digitalWrite(motorDirPin2, HIGH);
-  analogWrite(ativadorEsquerdo, 150);
-  analogWrite(ativadorDireito, 150);
+  mover(VEL_BUSCA, VEL_BUSCA, FRENTE, TRAS);
 }
 
+// Para o robô
 void parar() {
-  digitalWrite(motorEsqPin1, LOW); digitalWrite(motorEsqPin2, LOW);
-  digitalWrite(motorDirPin1, LOW); digitalWrite(motorDirPin2, LOW);
+  // Pode usar LOW/LOW (roda livre)
+  digitalWrite(motorEsqPin1, LOW);
+  digitalWrite(motorEsqPin2, LOW);
+
+  digitalWrite(motorDirPin1, LOW);
+  digitalWrite(motorDirPin2, LOW);
+
   analogWrite(ativadorEsquerdo, 0);
   analogWrite(ativadorDireito, 0);
 }
