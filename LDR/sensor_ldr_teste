@@ -1,7 +1,5 @@
-// --- Configurações dos Sensores ---
 const int pinoLDR_Esq = A0; 
 const int pinoLDR_Dir = A1; 
-const int limiar = 500; // Se leitura < 500, o robô viu a linha preta
 
 void setup() {
   Serial.begin(9600);
@@ -11,28 +9,10 @@ void loop() {
   int leituraEsq = analogRead(pinoLDR_Esq);
   int leituraDir = analogRead(pinoLDR_Dir);
 
-  // Lógica: Se o valor cair abaixo do limiar, detectamos o PRETO (borda)
-  
-  if (leituraEsq < limiar && leituraDir < limiar) {
-    // Ambos os sensores detectaram o preto ao mesmo tempo
-    Serial.println("BORDA TOTAL (PRETA) - Recuar urgente!");
-    // [Comando para os motores: RÉ]
+  Serial.print("Esquerda: ");
+  Serial.print(leituraEsq);
+  Serial.print("  |  Direita: ");
+  Serial.println(leituraDir);
 
-  } else if (leituraEsq < limiar) {
-    // Apenas o lado esquerdo detectou a linha preta
-    Serial.println("Linha na ESQUERDA - Girar para a direita!");
-    // [Comando: Motor Esq para trás / Motor Dir para frente]
-
-  } else if (leituraDir < limiar) {
-    // Apenas o lado direito detectou a linha preta
-    Serial.println("Linha na DIREITA - Girar para a esquerda!");
-    // [Comando: Motor Dir para trás / Motor Esq para frente]
-
-  } else {
-    // Ambos acima do limiar = Estão vendo o BRANCO (centro da arena)
-    Serial.println("No ringue (Branco) - Procurar inimigo");
-    // [Comando: Movimentação padrão]
-  }
-
-  delay(20); 
+  delay(500); // Espera meio segundo para você conseguir ler a tela
 }
