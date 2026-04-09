@@ -1,0 +1,40 @@
+// --- Configurações dos Sensores ---
+const int pinoLDR_Esq = A0; // Sensor da Esquerda
+const int pinoLDR_Dir = A1; // Sensor da Direita
+const int limiar = 500;     // Ajuste conforme a iluminação da arena
+
+void setup() {
+  Serial.begin(9600);
+  // Pinos analógicos não precisam obrigatoriamente de pinMode, 
+  // mas é uma boa prática de organização.
+}
+
+void loop() {
+  // Leitura independente dos dois sensores
+  int leituraEsq = analogRead(pinoLDR_Esq);
+  int leituraDir = analogRead(pinoLDR_Dir);
+
+  // Lógica de detecção de borda
+  if (leituraEsq > limiar && leituraDir > limiar) {
+    // Ambos os sensores detectaram a borda (frente total)
+    Serial.println("BORDA TOTAL - Recuar reto!");
+    // [Ação: Motores para trás]
+    
+  } else if (leituraEsq > limiar) {
+    // Apenas o lado esquerdo tocou a linha
+    Serial.println("Borda na ESQUERDA - Recuar girando para a direita!");
+    // [Ação: Motor esquerdo trás, motor direito frente/parado]
+
+  } else if (leituraDir > limiar) {
+    // Apenas o lado direito tocou a linha
+    Serial.println("Borda na DIREITA - Recuar girando para a esquerda!");
+    // [Ação: Motor direito trás, motor esquerdo frente/parado]
+
+  } else {
+    // Ambos no escuro (dentro do ringue)
+    Serial.println("Seguro - Procurar adversário");
+    // [Ação: Movimentação de busca/ataque]
+  }
+
+  delay(20); // Reduzi para 20ms para aumentar a taxa de amostragem no combate
+}
