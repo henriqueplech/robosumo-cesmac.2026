@@ -1,40 +1,38 @@
 // --- Configurações dos Sensores ---
-const int pinoLDR_Esq = A0; // Sensor da Esquerda
-const int pinoLDR_Dir = A1; // Sensor da Direita
-const int limiar = 500;     // Ajuste conforme a iluminação da arena
+const int pinoLDR_Esq = A0; 
+const int pinoLDR_Dir = A1; 
+const int limiar = 500; // Se leitura < 500, o robô viu a linha preta
 
 void setup() {
   Serial.begin(9600);
-  // Pinos analógicos não precisam obrigatoriamente de pinMode, 
-  // mas é uma boa prática de organização.
 }
 
 void loop() {
-  // Leitura independente dos dois sensores
   int leituraEsq = analogRead(pinoLDR_Esq);
   int leituraDir = analogRead(pinoLDR_Dir);
 
-  // Lógica de detecção de borda
-  if (leituraEsq > limiar && leituraDir > limiar) {
-    // Ambos os sensores detectaram a borda (frente total)
-    Serial.println("BORDA TOTAL - Recuar reto!");
-    // [Ação: Motores para trás]
-    
-  } else if (leituraEsq > limiar) {
-    // Apenas o lado esquerdo tocou a linha
-    Serial.println("Borda na ESQUERDA - Recuar girando para a direita!");
-    // [Ação: Motor esquerdo trás, motor direito frente/parado]
+  // Lógica: Se o valor cair abaixo do limiar, detectamos o PRETO (borda)
+  
+  if (leituraEsq < limiar && leituraDir < limiar) {
+    // Ambos os sensores detectaram o preto ao mesmo tempo
+    Serial.println("BORDA TOTAL (PRETA) - Recuar urgente!");
+    // [Comando para os motores: RÉ]
 
-  } else if (leituraDir > limiar) {
-    // Apenas o lado direito tocou a linha
-    Serial.println("Borda na DIREITA - Recuar girando para a esquerda!");
-    // [Ação: Motor direito trás, motor esquerdo frente/parado]
+  } else if (leituraEsq < limiar) {
+    // Apenas o lado esquerdo detectou a linha preta
+    Serial.println("Linha na ESQUERDA - Girar para a direita!");
+    // [Comando: Motor Esq para trás / Motor Dir para frente]
+
+  } else if (leituraDir < limiar) {
+    // Apenas o lado direito detectou a linha preta
+    Serial.println("Linha na DIREITA - Girar para a esquerda!");
+    // [Comando: Motor Dir para trás / Motor Esq para frente]
 
   } else {
-    // Ambos no escuro (dentro do ringue)
-    Serial.println("Seguro - Procurar adversário");
-    // [Ação: Movimentação de busca/ataque]
+    // Ambos acima do limiar = Estão vendo o BRANCO (centro da arena)
+    Serial.println("No ringue (Branco) - Procurar inimigo");
+    // [Comando: Movimentação padrão]
   }
 
-  delay(20); // Reduzi para 20ms para aumentar a taxa de amostragem no combate
+  delay(20); 
 }
