@@ -1,24 +1,40 @@
-// Versão adaptada para Robô Sumo
-const int pinoLDR = A0;
-const int limiar = 500;
+// --- Configurações dos Sensores ---
+const int pinoLDR_Esq = A0; 
+const int pinoLDR_Dir = A1; 
+
+// Novo limiar geral: 400
+const int limiar = 400; 
 
 void setup() {
   Serial.begin(9600);
-  // Remova o LED — no robô, a saída será para os motores
 }
 
 void loop() {
-  int leitura = analogRead(pinoLDR);
+  int leituraEsq = analogRead(pinoLDR_Esq);
+  int leituraDir = analogRead(pinoLDR_Dir);
 
-  if (leitura < limiar) {
-    // Superfície ESCURA (faixa preta da arena) → está dentro do ringue
-    // → manter movimento normal dos motores
-    Serial.println("Dentro do ringue");
+  // Lógica: 400 ou mais = PRETO (Borda). Abaixo de 400 = BRANCO (Arena).
+  
+  if (leituraEsq >= limiar && leituraDir >= limiar) {
+    // Ambos os sensores detectaram 400 ou mais
+    Serial.println("BORDA TOTAL (PRETA) - Recuar urgente!");
+    // [Comando para os motores: RÉ]
+
+  } else if (leituraEsq >= limiar) {
+    // Apenas o sensor esquerdo detectou 400 ou mais
+    Serial.println("Linha na ESQUERDA - Girar para a direita!");
+    // [Comando: Motor Esq para trás / Motor Dir para frente]
+
+  } else if (leituraDir >= limiar) {
+    // Apenas o sensor direito detectou 400 ou mais
+    Serial.println("Linha na DIREITA - Girar para a esquerda!");
+    // [Comando: Motor Dir para trás / Motor Esq para frente]
+
   } else {
-    // Superfície CLARA (borda branca) → saindo do ringue!
-    // → acionar recuo/desvio dos motores aqui
-    Serial.println("BORDA DETECTADA — recuar!");
+    // Ambos os sensores estão abaixo de 400
+    Serial.println("No ringue (Branco) - Pode prosseguir (Procurar inimigo)");
+    // [Comando: Movimentação padrão / Seguir em frente]
   }
 
-  delay(50); // Menor delay = reação mais rápida no combate
+  delay(5); 
 }
