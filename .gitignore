@@ -1,0 +1,25 @@
+# ─── Arduino / IDE ───────────────────────────────────────────────
+*.elf
+*.hex
+*.bin
+*.map
+*.eep
+build/
+.build/
+*.orig
+
+# ─── IDE / Editors ───────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ─── Sistema Operacional ─────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ─── Logs / Temporários ──────────────────────────────────────────
+*.log
+*.tmp
