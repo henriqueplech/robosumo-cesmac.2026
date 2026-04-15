@@ -1,86 +1,56 @@
 // ==========================
 // DEFINIÇÃO DOS PINOS
 // ==========================
-
 // Motor esquerdo
 int motorEsqPin1 = 7;
 int motorEsqPin2 = 8;
 int ativadorEsquerdo = 3; // PWM
 
 // Motor direito
-int motorDirPin1 = 12;
+int motorDirPin1 = 4;     // Pino atualizado para evitar conflito com Ultrassônico
 int motorDirPin2 = 13;
-int ativadorDireito = 5; // PWM
-
+int ativadorDireito = 5;  // PWM
 
 // ==========================
 // CONFIGURAÇÕES DE VELOCIDADE
 // ==========================
+int VEL_FRENTE = 180;      // Velocidade controlada para não sair da pista
+int VEL_CURVA_SUAVE = 100; // Velocidade da roda de dentro na curva
+int VEL_GIRO_EIXO = 150;   // Velocidade para virar 90 graus no lugar
 
-int VEL_ATAQUE = 255; // máxima potência
-int VEL_BUSCA  = 150; // velocidade média
-int VEL_FUGA   = 200; // velocidade para recuar
-
-// Ajuste fino (caso o robô puxe pra um lado)
-int ajusteEsq = 255;
-int ajusteDir = 255;
-
+// Ajuste fino (caso o robô puxe pra um lado naturalmente)
+int ajusteEsq = 180;
+int ajusteDir = 180; 
 
 // ==========================
 // ENUM PARA DIREÇÃO
 // ==========================
-
 enum Direcao {
   FRENTE,
   TRAS
 };
-
-
-// ==========================
-// SETUP
-// ==========================
 
 void setup() {
   // Configura todos os pinos como saída
   pinMode(motorEsqPin1, OUTPUT);
   pinMode(motorEsqPin2, OUTPUT);
   pinMode(ativadorEsquerdo, OUTPUT);
-
   pinMode(motorDirPin1, OUTPUT);
   pinMode(motorDirPin2, OUTPUT);
   pinMode(ativadorDireito, OUTPUT);
-
-  // Inicialmente, deixa o robô parado
+  
+  // Inicialmente, aciona o freio motor para garantir que não se mova
   parar();
 }
 
-
-// ==========================
-// LOOP PRINCIPAL
-// ==========================
-
 void loop() {
-  // Aqui você vai colocar a lógica do robô (sensores)
-
-  // Exemplo básico:
-  // int distancia = lerDistancia();
-
-  // if (distancia > 0 && distancia < 20) {
-  //   irFrente(); // ataca
-  // } else {
-  //   girarProcurando(); // procura inimigo
-  // }
-
-  // Por enquanto, só gira (teste)
-  girarProcurando();
+  // A lógica dos sensores entrará aqui no código final.
+  // Por enquanto, mantenha vazio ou use para testar os motores chamando as funções abaixo.
 }
 
-
 // ==========================
-// FUNÇÃO AUXILIAR DE MOTOR
+// FUNÇÕES AUXILIARES DE MOTOR
 // ==========================
-
-// Controla um motor individual
 void setMotor(int pin1, int pin2, Direcao dir) {
   if (dir == FRENTE) {
     digitalWrite(pin1, HIGH);
@@ -91,52 +61,54 @@ void setMotor(int pin1, int pin2, Direcao dir) {
   }
 }
 
-
-// ==========================
-// FUNÇÃO PRINCIPAL DE MOVIMENTO
-// ==========================
-
-// Controla os dois motores ao mesmo tempo
+// Controla os dois motores e a velocidade ao mesmo tempo
 void mover(int velEsq, int velDir, Direcao direcaoEsq, Direcao direcaoDir) {
-  
-  // Define direção de cada motor
   setMotor(motorEsqPin1, motorEsqPin2, direcaoEsq);
   setMotor(motorDirPin1, motorDirPin2, direcaoDir);
-
-  // Define velocidade (PWM)
   analogWrite(ativadorEsquerdo, velEsq);
   analogWrite(ativadorDireito, velDir);
 }
 
-
 // ==========================
-// MOVIMENTOS DO ROBÔ
+// MOVIMENTOS DO ROBÔ REFINADOS
 // ==========================
 
-// Anda para frente (ataque)
+// 1. Seguir reto na pista branca
 void irFrente() {
   mover(ajusteEsq, ajusteDir, FRENTE, FRENTE);
 }
 
-// Anda para trás (fuga)
-void irTras() {
-  mover(VEL_FUGA, VEL_FUGA, TRAS, TRAS);
+// 2. Correção suave para a Direita (se o sensor Esquerdo tocar na linha preta)
+void corrigirDireita() {
+  // Roda esquerda vai mais rápido, roda direita diminui para curvar sutilmente
+  mover(ajusteEsq, VEL_CURVA_SUAVE, FRENTE, FRENTE);
 }
 
-// Gira no próprio eixo procurando inimigo
-void girarProcurando() {
-  mover(VEL_BUSCA, VEL_BUSCA, FRENTE, TRAS);
+// 3. Correção suave para a Esquerda (se o sensor Direito tocar na linha preta)
+void corrigirEsquerda() {
+  // Roda direita vai mais rápido, roda esquerda diminui para curvar sutilmente
+  mover(VEL_CURVA_SUAVE, ajusteDir, FRENTE, FRENTE);
 }
 
-// Para o robô
+// 4. Virar 90 graus à Direita no próprio eixo (Para usar quando chegar na PAREDE)
+void virarDireita90() {
+  mover(VEL_GIRO_EIXO, VEL_GIRO_EIXO, FRENTE, TRAS);
+}
+
+// 5. Virar 90 graus à Esquerda no próprio eixo (Após cruzamentos)
+void virarEsquerda90() {
+  mover(VEL_GIRO_EIXO, VEL_GIRO_EIXO, TRAS, FRENTE);
+}
+
+// 6. Parada total (Frenagem Ativa / Freio Motor)
 void parar() {
-  // Pode usar LOW/LOW (roda livre)
-  digitalWrite(motorEsqPin1, LOW);
-  digitalWrite(motorEsqPin2, LOW);
-
-  digitalWrite(motorDirPin1, LOW);
-  digitalWrite(motorDirPin2, LOW);
-
-  analogWrite(ativadorEsquerdo, 0);
-  analogWrite(ativadorDireito, 0);
+  // Coloca os terminais no mesmo estado (HIGH) para travar o motor
+  digitalWrite(motorEsqPin1, HIGH);
+  digitalWrite(motorEsqPin2, HIGH); 
+  digitalWrite(motorDirPin1, HIGH);
+  digitalWrite(motorDirPin2, HIGH);
+  
+  // MANTÉM a potência no máximo para acionar o freio eletromagnético com força total
+  analogWrite(ativadorEsquerdo, 255);
+  analogWrite(ativadorDireito, 255);
 }
