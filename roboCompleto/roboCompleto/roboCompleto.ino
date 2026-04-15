@@ -98,7 +98,7 @@ void loop() {
   }
 
   // --- PRIORIDADE 1: A PAREDE (Ultrassônico) ---
-  if (distancia > 0 && distancia <= 20) {
+  if (distancia > 0 && distancia <= 15) {
     if(MODO_DEBUG) Serial.println("🚧 PAREDE! Freando e virando à DIREITA.");
     parar();
     if(!MODO_DEBUG) delay(200); 
