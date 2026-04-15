@@ -3,7 +3,7 @@
 // ==========================================
 
 // 🟢 CHAVE DE DEBUG: Deixe 1 para testar no PC, mude para 0 na hora da corrida!
-#define MODO_DEBUG 0
+#define MODO_DEBUG 1
 
 // --- Pinos do Sensor Ultrassônico ---
 const int TRIG = 13;
@@ -28,7 +28,7 @@ int ativadorDireito = 5;  // PWM
 // --- Configurações de Velocidade (AJUSTADAS PARA MAIS SUAVIDADE) ---
 int VEL_FRENTE = 100;      // Era 150 - Um pouco mais lento para dar tempo de ler
 int VEL_CURVA_SUAVE = 70;  // Era 100 - Correção menos agressiva para não "dançar"
-int VEL_GIRO_EIXO = 150;   // Mantido para garantir que o giro de 90° tenha força
+int VEL_GIRO_EIXO = 120;   // Mantido para garantir que o giro de 90° tenha força
 
 int ajusteEsq = VEL_FRENTE; 
 int ajusteDir = VEL_FRENTE; 
@@ -104,34 +104,25 @@ void loop() {
     if(!MODO_DEBUG) delay(200); 
     virarEsquerda90();
     if(!MODO_DEBUG) delay(500); 
+    passouParede = true;
   }
+
+  // passar obstaculo final
+  else if (leituraEsq >= limiarLinha && leituraDir >= limiarLinha && passouParede == true) {
+    if(MODO_DEBUG) Serial.println("➕ CRUZAMENTO! Seguindo em frente.");
+    irFrente();
+    virarDireita90();
+    if(!MODO_DEBUG) delay(300);
+    passouParede == false;
+  }
+
   // --- PRIORIDADE 2: O CRUZAMENTO PRETO (Ambos os QRE) ---
   else if (leituraEsq >= limiarLinha && leituraDir >= limiarLinha) {
     if(MODO_DEBUG) Serial.println("➕ CRUZAMENTO! Seguindo em frente.");
     irFrente();
     if(!MODO_DEBUG) delay(300);
   }
-    // --- PRIORIDADE 3: O CRUZAMENTO DA CURVA ---
-  else if (leituraEsq >= 999 && leituraDir >= 999) {
-    if(MODO_DEBUG) Serial.println("➕ CRUZAMENTO! Seguindo em frente.");
-    irFrente();
-    if(!MODO_DEBUG) delay(300);
-  }
-
-    // --- PRIORIDADE 3: O CRUZAMENTO DA CURVA ---
-  else if (leituraEsq >= limiarLinha && leituraDir >= limiarLinha) {
-    if(MODO_DEBUG) Serial.println("➕ CRUZAMENTO! Seguindo em frente.");
-    irFrente();
-    if(!MODO_DEBUG) delay(300);
-  }
-
-    else if (leituraEsq >= limiarLinha && leituraDir >= limiarLinha && passouParede == 1) {
-    if(MODO_DEBUG) Serial.println("➕ CRUZAMENTO! Seguindo em frente.");
-    irFrente();
-    delay(500);
-    virarEsquerda90();
-    if(!MODO_DEBUG) delay(300);
-  }
+    // --- PRIORIDADE 3: O CRUZAMENTO DA CURVA -
 
   // --- PRIORIDADE 4: CORREÇÕES DE PISTA ---
   else if (leituraEsq >= limiarLinha) {
@@ -198,7 +189,7 @@ void mover(int velEsq, int velDir, Direcao direcaoEsq, Direcao direcaoDir) {
   analogWrite(ativadorDireito, velDir);
 }
 
-void irFrente() { mover(105, 140, FRENTE, FRENTE); }
+void irFrente() { mover(80, 90, FRENTE, FRENTE); }
 void corrigirDireita() { 
   // 1. Dá ré um pouco para sair da linha
   mover(ajusteEsq, ajusteDir, TRAS, TRAS);
