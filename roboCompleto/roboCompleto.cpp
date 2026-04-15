@@ -9,7 +9,7 @@ const int ECHO = 11;
 // --- Pinos dos Sensores de Linha (QRE1113) ---
 const int pinoQRE_Esq = A0; 
 const int pinoQRE_Dir = A1;
-const int limiarLinha = 400; // >= 400: detectou a linha preta [cite: 30]
+const int limiarLinha = 400; // >= 400: detectou a linha preta
 
 // --- Pinos da Ponte H (L298N) ---
 // Motor esquerdo
@@ -18,7 +18,7 @@ int motorEsqPin2 = 8;
 int ativadorEsquerdo = 3; // PWM
 
 // Motor direito
-int motorDirPin1 = 4;     // Pino atualizado para evitar conflito com Ultrassônico [cite: 35]
+int motorDirPin1 = 4;     // Pino atualizado para evitar conflito com Ultrassônico
 int motorDirPin2 = 13;
 int ativadorDireito = 5;  // PWM
 
@@ -52,8 +52,7 @@ void setup() {
   pinMode(motorDirPin2, OUTPUT);
   pinMode(ativadorDireito, OUTPUT);
   
-  // Inicialmente, aciona o freio motor para garantir que não se mova [cite: 51, 60]
-  parar();
+  // Inicialmente, aciona o freio motor para garantir que não se mova
   
   // Aguarda 3 segundos antes de iniciar o percurso
   delay(3000);
@@ -73,7 +72,7 @@ void loop() {
     parar();
     delay(200); // Freia completamente antes de virar
     virarDireita90();
-    // ATENÇÃO: Ajuste este delay(500) até que o robô faça exatamente 90 graus na vida real! [cite: 37]
+    // ATENÇÃO: Ajuste este delay(500) até que o robô faça exatamente 90 graus na vida real!
     delay(500); 
   }
   
@@ -81,28 +80,28 @@ void loop() {
   else if (leituraEsq >= limiarLinha && leituraDir >= limiarLinha) {
     // Detectou a faixa preta cortando a pista 
     irFrente();
-    delay(300); // Tempo para passar o corpo do robô pela faixa preta [cite: 39]
+    delay(300); // Tempo para passar o corpo do robô pela faixa preta
     parar();
     delay(200);
-    virarEsquerda90(); // Faz a curva pra esquerda conforme a regra do circuito [cite: 40]
+    virarEsquerda90(); // Faz a curva pra esquerda conforme a regra do circuito
     // ATENÇÃO: Ajuste este delay até que o giro seja de 90 graus
     delay(500); 
   }
   
   // --- PRIORIDADE 3: CORREÇÕES DE PISTA (Um QRE leu preto) ---
   else if (leituraEsq >= limiarLinha) {
-    // Encostou na linha esquerda, corrige para a direita [cite: 41]
+    // Encostou na linha esquerda, corrige para a direita
     corrigirDireita();
   }
   else if (leituraDir >= limiarLinha) {
-    // Encostou na linha direita, corrige para a esquerda [cite: 42]
+    // Encostou na linha direita, corrige para a esquerda
     corrigirEsquerda();
   }
   
   // --- AÇÃO PADRÃO: CAMINHO LIVRE (Tudo Branco) ---
   else {
-    // Ambos os sensores < 400 [cite: 42]
-    irFrente(); [cite: 43]
+    // Ambos os sensores < 400
+    irFrente();
   }
 
   // Pequeno intervalo para estabilidade do Arduino
@@ -193,7 +192,7 @@ void parar() {
   digitalWrite(motorDirPin1, HIGH);
   digitalWrite(motorDirPin2, HIGH);
   
-  // MANTÉM a potência no máximo para acionar o freio eletromagnético com força total [cite: 79, 80]
+  // MANTÉM a potência no máximo para acionar o freio eletromagnético com força total
   analogWrite(ativadorEsquerdo, 255);
   analogWrite(ativadorDireito, 255);
 }
