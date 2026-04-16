@@ -95,7 +95,7 @@ Esta seção documenta **como o robô foi construído**, etapa por etapa, preser
 - Escolha do microcontrolador: **Arduino Uno** (acessível, bem documentado, compatível com Tinkercad)
 - Escolha dos sensores:
   - **HC-SR04** para distância (ultrassônico, fácil de interfacear)
-  - **QRE1113** (sensor óptico reflexivo) para linha/borda
+  - **LDR** (Fotoresistor) Resistencia varia conforme a intensidade da luz
   - **L298N** (Ponte H) para acionamento dos motores DC com PWM
 - Divisão de responsabilidades entre os membros da equipe
 
