@@ -40,7 +40,7 @@ O robô é uma plataforma autônoma de sumô construída sobre chassi em MDF cor
 | Membro | Função |
 |--------|--------|
 | 🧑‍💻 **Iderlan Oliveira** | Líder do Projeto |
-| 🧑‍💻 **Henrique Ferrario** | Programador Principal |
+| 🧑‍💻 **Henrique Ferrario** | Programador |
 | 🧑‍💻 **Luiz Luna** | Programador |
 | 🎯 **João Danilo** | Estrategista |
 | 🎯 **Ana Clara** | Estrategista |
