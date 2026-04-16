@@ -213,7 +213,7 @@ Robô apresentado e operado na competição **CITEC — CESMAC 2026**. Foto da m
 |-----------|-----|--------|-------|
 | Arduino Uno | 1x | Microcontrolador central | Compatível com Tinkercad |
 | Sensor Ultrassônico HC-SR04 | 1x | Detecção de obstáculos/paredes | TRIG=13, ECHO=12 |
-| Sensor Óptico QRE1113 | 2x | Detecção de linha/borda | A0, A1 |
+| Sensor Óptico LDR | 2x | Detecção de linha/borda | A0, A1 |
 | Driver Motor L298N | 1x | Controle bidirecional dos motores | PWM nos pinos 5 e 10 |
 | Motor DC com caixa de redução | 2x | Locomoção | ~6V |
 | Chassi MDF cortado a laser | 1x | Estrutura física do robô | — |
@@ -230,7 +230,7 @@ Robô apresentado e operado na competição **CITEC — CESMAC 2026**. Foto da m
 │                   ARDUINO UNO                        │
 │                                                      │
 │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  │
-│  │ HC-SR04     │  │ QRE1113     │  │ L298N       │  │
+│  │ HC-SR04     │  │ LDR.        │  │ L298N       │  │
 │  │ Ultrassônico│  │ (x2) Linha  │  │ Ponte H     │  │
 │  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘  │
 │         └────────────────┴─────────────────┘        │
