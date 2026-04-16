@@ -28,7 +28,7 @@
 O robô é uma plataforma autônoma de sumô construída sobre chassi em MDF cortado a laser, capaz de:
 
 - 🔍 **Detectar obstáculos à frente** com sensor ultrassônico HC-SR04
-- ⚠️ **Identificar bordas e linhas** da pista com sensores ópticos QRE1113
+- ⚠️ **Identificar bordas e linhas** da pista com sensores ópticos LDR
 - ⚡ **Tomar decisões autônomas** em tempo real (seguir, corrigir trajetória, contornar)
 - 🏎️ **Controlar velocidade com PWM** via Ponte H L298N
 - 🐛 **Modo Debug via Serial** para calibração sem precisar recompilar
