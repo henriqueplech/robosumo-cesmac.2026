@@ -217,9 +217,9 @@ Robô apresentado e operado na competição **CITEC — CESMAC 2026**. Foto da m
 | Driver Motor L298N | 1x | Controle bidirecional dos motores | PWM nos pinos 5 e 10 |
 | Motor DC com caixa de redução | 2x | Locomoção | ~6V |
 | Chassi MDF cortado a laser | 1x | Estrutura física do robô | — |
-| Rodas + Roda boba | 3x | Deslocamento | — |
+| Rodas | 2x | Deslocamento | — |
 | Protoboard + Jumpers | — | Prototipagem das conexões | — |
-| Fonte (bateria) | 1x | Alimentação | ~7,4V LiPo ou 6xAA |
+| Fonte (bateria) | 3x | Alimentação | Pilhas lítio |
 
 ---
 
