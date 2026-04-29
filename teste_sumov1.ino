@@ -6,7 +6,7 @@
 // ⚙️  PAINEL DE CONFIGURAÇÃO — só mexa aqui!
 // ============================================================
 
-#define MODO_DEBUG 1        // 1 = debug ligado | 0 = competição
+#define MODO_DEBUG 0        // 1 = debug ligado | 0 = competição
 
 // --- Velocidades (0 a 255) ---
 #define VEL_FRENTE   100
@@ -19,7 +19,7 @@
 
 // --- Tempo dos movimentos (ms) ---
 #define TEMPO_RE          350   // quanto tempo recua ao ver borda
-#define TEMPO_GIRO_90     280   // ajuste até girar ~90° de verdade
+#define TEMPO_GIRO_90     250   // ajuste até girar ~90° de verdade
 #define TEMPO_VOLTA_CENTRO 400  // quanto avança após fugir da borda
 
 // ---------------------------------------------------------------
@@ -34,8 +34,8 @@
 //
 //    Exemplo: Preto=400, Branco=700 → limiar = 550
 // ---------------------------------------------------------------
-#define LIMIAR_ESQ   500    // ← ajuste com base na calibração acima
-#define LIMIAR_DIR   150    // ← ajuste com base na calibração acima
+#define LIMIAR_ESQ   800    // ← ajuste com base na calibração acima
+#define LIMIAR_DIR   800    // ← ajuste com base na calibração acima
 //                              (Dir lê valores menores que Esq, por isso são diferentes)
 
 // ============================================================
@@ -91,8 +91,8 @@ void loop() {
   int qreDir = analogRead(QRE_DIR);
   int dist   = lerDistancia();
 
-  bool bordaEsq = (qreEsq >= LIMIAR_ESQ);
-  bool bordaDir = (qreDir >= LIMIAR_DIR);
+  bool bordaEsq = (qreEsq < LIMIAR_ESQ);
+  bool bordaDir = (qreDir < LIMIAR_DIR);
 
   // --- Debug no Serial Monitor ---
   if (MODO_DEBUG) {
