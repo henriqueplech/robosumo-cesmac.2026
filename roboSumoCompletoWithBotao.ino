@@ -2,47 +2,23 @@
 // ROBÔ SUMÔ — CESMAC 2026
 // ==========================================
 
-// ============================================================
-// ⚙️  PAINEL DE CONFIGURAÇÃO — só mexa aqui!
-// ============================================================
+#define MODO_DEBUG 0
+#define BOTAO_START  2
 
-#define MODO_DEBUG 0        // 1 = debug ligado | 0 = competição
-
-// --- Pino do Botão de Start ---
-#define BOTAO_START  2      // pino digital onde o botão está ligado na protoboard
-
-// --- Velocidades (0 a 255) ---
 #define VEL_FRENTE   100
 #define VEL_ATAQUE   200
 #define VEL_GIRO     130
 #define VEL_RE       120
 
-// --- Distância mínima para atacar (cm) ---
 #define DIST_ATAQUE  30
 
-// --- Tempo dos movimentos (ms) ---
-#define TEMPO_RE           350  // quanto tempo recua ao ver borda
-#define TEMPO_GIRO_90      250  // ajuste até girar ~90° de verdade
-#define TEMPO_VOLTA_CENTRO 400  // quanto avança após fugir da borda
+#define TEMPO_RE           350
+#define TEMPO_GIRO_90      250
+#define TEMPO_VOLTA_CENTRO 400
 
-// ---------------------------------------------------------------
-// 🔧 LIMIARES DOS SENSORES DE LINHA (QRE)
-//    Leitura ABAIXO do limiar = BORDA BRANCA detectada!
-//
-//    COMO CALIBRAR (faça isso ANTES da competição):
-//    1. Ligue o robô com MODO_DEBUG 1
-//    2. Coloque-o sobre a superfície PRETA (arena) → anote os valores
-//    3. Coloque sobre a fita BRANCA (borda)        → anote os valores
-//    4. Defina o limiar no MEIO entre os dois valores
-//
-//    Exemplo: Preto=400, Branco=700 → limiar = 550
-// ---------------------------------------------------------------
 #define LIMIAR_ESQ  800
 #define LIMIAR_DIR  800
 
-// ============================================================
-// PINOS — não mude se a fiação está igual ao original
-// ============================================================
 #define TRIG        13
 #define ECHO        12
 #define QRE_ESQ     A0
@@ -56,42 +32,71 @@
 #define MOT_DIR_2    6
 #define MOT_DIR_PWM  5
 
-// ============================================================
-// CÓDIGO — não precisa editar abaixo daqui
-// ============================================================
 enum Direcao { FRENTE, TRAS };
-
 int ciclo = 0;
 
+// ===============================
+// ESTADOS DO ROBÔ
+// ===============================
+enum Estado { PARADO, CONTAGEM, RODANDO };
+Estado estado = PARADO;
+
+// ===============================
+// BOTÃO (debounce)
+// ===============================
+bool estadoBotao = HIGH;
+bool ultimoEstadoLido = HIGH;
+unsigned long ultimoTempoDebounce = 0;
+const unsigned long debounceDelay = 50;
+
+// ===============================
+// CONTAGEM
+// ===============================
+unsigned long inicioContagem = 0;
+int ultimoSegundo = -1;
+
+// ===============================
+// SETUP
+// ===============================
 void setup() {
   Serial.begin(9600);
 
-  // Configura pinos
   pinMode(BOTAO_START, INPUT_PULLUP);
   pinMode(TRIG, OUTPUT);
   pinMode(ECHO, INPUT);
+
   pinMode(MOT_ESQ_1, OUTPUT); pinMode(MOT_ESQ_2, OUTPUT); pinMode(MOT_ESQ_PWM, OUTPUT);
   pinMode(MOT_DIR_1, OUTPUT); pinMode(MOT_DIR_2, OUTPUT); pinMode(MOT_DIR_PWM, OUTPUT);
 
   parar();
-
-  // --- Aguarda o botão ser pressionado ---
-  Serial.println("Aguardando botao de START...");
-  while (digitalRead(BOTAO_START) == HIGH) {
-    // fica aqui parado até alguém apertar o botão
-  }
-
-  // --- Contagem regressiva de 5 segundos ---
-  Serial.println("Botao pressionado! Iniciando em 5s...");
-  for (int i = 5; i > 0; i--) {
-    Serial.print(i); Serial.println("...");
-    delay(1000);
-  }
-  Serial.println("VAI!");
+  Serial.println("Pronto. Aperte o botao.");
 }
 
+// ===============================
+// LOOP
+// ===============================
 void loop() {
-  // --- Leitura dos sensores ---
+
+  atualizarBotao();
+
+  // ===============================
+  // ESTADOS
+  // ===============================
+
+  if (estado == PARADO) {
+    parar();
+    return;
+  }
+
+  if (estado == CONTAGEM) {
+    executarContagem();
+    return;
+  }
+
+  // ===============================
+  // RODANDO (lógica original)
+  // ===============================
+
   int qreEsq = analogRead(QRE_ESQ);
   int qreDir = analogRead(QRE_DIR);
   int dist   = lerDistancia();
@@ -99,38 +104,18 @@ void loop() {
   bool bordaEsq = (qreEsq < LIMIAR_ESQ);
   bool bordaDir = (qreDir < LIMIAR_DIR);
 
-  // --- Debug no Serial Monitor ---
-  if (MODO_DEBUG) {
-    Serial.print("Dist: ");   Serial.print(dist);   Serial.print("cm");
-    Serial.print(" | ESQ: "); Serial.print(qreEsq); Serial.print(bordaEsq ? " [BORDA]" : " [ok]");
-    Serial.print(" | DIR: "); Serial.print(qreDir); Serial.print(bordaDir ? " [BORDA]" : " [ok]");
-    Serial.print("  ->  ");
-  }
-
-  // ====================================================
-  // PRIORIDADE 1: BORDA — foge e volta ao centro
-  // ====================================================
   if (bordaEsq || bordaDir) {
     fugirDaBorda(bordaEsq, bordaDir);
     ciclo = 0;
 
-  // ====================================================
-  // PRIORIDADE 2: ADVERSÁRIO — ataca!
-  // ====================================================
   } else if (dist > 0 && dist <= DIST_ATAQUE) {
-    if (MODO_DEBUG) { Serial.print("ATACANDO a "); Serial.print(dist); Serial.println("cm!"); }
     mover(VEL_ATAQUE, VEL_ATAQUE, FRENTE, FRENTE);
 
-  // ====================================================
-  // PADRÃO: busca — alterna entre andar e girar
-  // ====================================================
   } else {
     ciclo++;
     if (ciclo % 8 < 5) {
-      if (MODO_DEBUG) Serial.println("Buscando: FRENTE");
       mover(VEL_FRENTE, VEL_FRENTE, FRENTE, FRENTE);
     } else {
-      if (MODO_DEBUG) Serial.println("Buscando: GIRANDO");
       mover(VEL_GIRO, VEL_GIRO, FRENTE, TRAS);
     }
   }
@@ -138,49 +123,94 @@ void loop() {
   delay(MODO_DEBUG ? 500 : 30);
 }
 
-// ============================================================
-// FUGA DE BORDA
-// Recua → vira para o lado oposto → avança ao centro
-// ============================================================
-void fugirDaBorda(bool esq, bool dir) {
-  parar();
-  delay(50);
+// ===============================
+// BOTÃO COM DEBOUNCE
+// ===============================
+void atualizarBotao() {
+  bool leitura = digitalRead(BOTAO_START);
 
-  if (MODO_DEBUG) {
-    if (esq && dir) Serial.println("BORDA DOS DOIS LADOS → recua + 180°");
-    else if (esq)   Serial.println("BORDA ESQUERDA → recua + vira direita");
-    else            Serial.println("BORDA DIREITA  → recua + vira esquerda");
+  if (leitura != ultimoEstadoLido) {
+    ultimoTempoDebounce = millis();
   }
 
-  // Passo 1: recua
+  if ((millis() - ultimoTempoDebounce) > debounceDelay) {
+    if (leitura != estadoBotao) {
+      estadoBotao = leitura;
+
+      if (estadoBotao == LOW) {
+        tratarClique();
+      }
+    }
+  }
+
+  ultimoEstadoLido = leitura;
+}
+
+// ===============================
+// AÇÃO DO BOTÃO
+// ===============================
+void tratarClique() {
+
+  if (estado == PARADO) {
+    estado = CONTAGEM;
+    inicioContagem = millis();
+    ultimoSegundo = -1;
+    Serial.println("Iniciando em 5s...");
+  }
+  else {
+    // Se estiver em CONTAGEM ou RODANDO → para tudo
+    estado = PARADO;
+    Serial.println("PARADO");
+  }
+}
+
+// ===============================
+// CONTAGEM SEM DELAY
+// ===============================
+void executarContagem() {
+  unsigned long tempo = millis() - inicioContagem;
+  int segundos = 5 - (tempo / 1000);
+
+  if (segundos != ultimoSegundo && segundos > 0) {
+    Serial.print(segundos);
+    Serial.println("...");
+    ultimoSegundo = segundos;
+  }
+
+  if (tempo >= 5000) {
+    estado = RODANDO;
+    Serial.println("VAI!");
+  }
+}
+
+// ===============================
+// RESTO DO CÓDIGO (igual)
+// ===============================
+void fugirDaBorda(bool esq, bool dir) {
+  parar(); delay(50);
+
   mover(VEL_RE, VEL_RE, TRAS, TRAS);
   delay(TEMPO_RE);
-  parar();
-  delay(50);
+  parar(); delay(50);
 
-  // Passo 2: vira para o lado oposto à borda
   if (esq && dir) {
-    mover(VEL_GIRO, VEL_GIRO, FRENTE, TRAS);   // gira 180°
+    mover(VEL_GIRO, VEL_GIRO, FRENTE, TRAS);
     delay(TEMPO_GIRO_90 * 2);
   } else if (esq) {
-    mover(VEL_GIRO, VEL_GIRO, FRENTE, TRAS);   // vira à direita
+    mover(VEL_GIRO, VEL_GIRO, FRENTE, TRAS);
     delay(TEMPO_GIRO_90);
   } else {
-    mover(VEL_GIRO, VEL_GIRO, TRAS, FRENTE);   // vira à esquerda
+    mover(VEL_GIRO, VEL_GIRO, TRAS, FRENTE);
     delay(TEMPO_GIRO_90);
   }
-  parar();
-  delay(50);
 
-  // Passo 3: avança em direção ao centro
+  parar(); delay(50);
+
   mover(VEL_FRENTE, VEL_FRENTE, FRENTE, FRENTE);
   delay(TEMPO_VOLTA_CENTRO);
   parar();
 }
 
-// ============================================================
-// ULTRASSÔNICO — retorna distância em cm (999 = livre)
-// ============================================================
 int lerDistancia() {
   digitalWrite(TRIG, LOW);
   delayMicroseconds(2);
@@ -193,9 +223,6 @@ int lerDistancia() {
   return (dist == 0 || dist > 200) ? 999 : dist;
 }
 
-// ============================================================
-// MOTORES
-// ============================================================
 void parar() {
   analogWrite(MOT_ESQ_PWM, 0);
   analogWrite(MOT_DIR_PWM, 0);
